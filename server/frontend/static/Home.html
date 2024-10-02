@@ -7,23 +7,52 @@
 <script>
 
 const logout = async (e) => {
-//Include the code for logout here.
-};
+  e.preventDefault(); // Prevent any default link behavior
+  let logout_url = window.location.origin + "/djangoapp/logout";
+  console.log(logout_url);
 
-let checkSession = ()=>{
+  try {
+    const res = await fetch(logout_url, {
+      method: "GET",
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to log out.");
+    }
+
+    // Only attempt to parse JSON if the response has content
+    const json = await res.json().catch(() => null);
+
+    if (json || res.status === 200) { // Check for a successful status or valid JSON
+      let username = sessionStorage.getItem('username');
+      sessionStorage.removeItem('username');
+      window.location.href = window.location.origin; // Redirects to homepage
+      alert("Logging out " + username + "...");
+    } else {
+      alert("The user could not be logged out.");
+    }
+  } catch (error) {
+    console.error("Logout error:", error);
+    alert("An error occurred while logging out.");
+  }
+}
+
+let checkSession = () => {
   let curr_user = sessionStorage.getItem("username");
 
   if (curr_user && curr_user !== "") {
     document.getElementById("loginlogout").innerHTML = 
-    '<span class="homepage_links">' + curr_user +'</span>' +
-    '<a class="homepage_links" onclick="logout()" href="/">Logout</a>'
+      '<span class="homepage_links">' + curr_user + '</span>' +
+      '<a class="homepage_links" href="/" onclick="logout(event)">Logout</a>';
   } else {
     document.getElementById("loginlogout").innerHTML = 
-    '<a class="homepage_links" href="/login">Login</a>'+
-    '<a class="homepage_links"  href="/register">Register</a>'
+      '<a class="homepage_links" href="/login">Login</a>' +
+      '<a class="homepage_links" href="/register">Register</a>';
   }
- }
+}
+
 </script>
+
 </head>
 <body onload="checkSession()">
 <nav class="navbar navbar-expand-lg navbar-light" style="background-color:darkturquoise; height: 1in;">
